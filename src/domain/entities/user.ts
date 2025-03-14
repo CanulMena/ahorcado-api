@@ -1,23 +1,40 @@
 import { CustomError } from "../errors/custom-error";
-export class UserEntity {
-    constructor(
-      public readonly nombre: string,
-      public readonly apellidos: string,
-      public readonly direccion: string,
-      public readonly localidad: string,
-      public readonly municipio: string,
-    ){}
-  
-  
-    static fromJson( props: {[key: string]: any} ): UserEntity { //uso de tuplas para retornar un error o un objeto
-      const { nombre, apellidos, direccion, localidad, municipio} = props;
 
-      if( typeof nombre !== 'string' ) throw CustomError.badRequest('name must be a string');
-      if( typeof apellidos !== 'string' ) throw CustomError.badRequest('apellidos must be a string');
-      if( typeof direccion !== 'string' ) throw CustomError.badRequest('direccion must be a string');
-      if( typeof localidad !== 'string' ) throw CustomError.badRequest('localidad must be a number');
-      if( typeof municipio !== 'string' ) throw CustomError.badRequest('municipio must be a string');
-  
-      return new UserEntity( nombre, apellidos, direccion, localidad, municipio );
-    }
+const validRoles = ['ADMIN','USUARIO'] as const;
+
+export type UserRole = typeof validRoles[number]; //*User role simpre será uno de los valores de validRoles
+
+export class UserEntity {
+
+  public static readonly validRoles = validRoles; // esta copiando el valor de validRoles a validRoles = ['ADMIN', 'OPERATOR', 'DELIVERY', 'SUPER_ADMIN']
+
+  constructor(
+    public userId: number, //Identificador unico del usuario
+    public name: string, // Nombre del usuario
+    public email: string, // Guardar el correo con el que se registrará el usuario
+    public passwordHash: string, // Guardar el hash en vez de la contraseña
+    public rol: UserRole, //Roles que puede tener el usuario
+  ){}
+
+  public static isValidRole(role: any): role is UserRole {
+    return UserEntity.validRoles.includes(role);
+  }
+
+  static fromJson( props: {[key: string]: any} ): UserEntity { //uso de tuplas para retornar un error o un objeto
+    const {  
+      id,
+      nombre,
+      email,
+      contrasena,
+      rol } = props;
+
+      if(!id) throw CustomError.badRequest('Missing id');
+      if(!nombre) throw CustomError.badRequest('Missing nombre');
+      if(!email) throw CustomError.badRequest('Missing email');
+      if(!contrasena) throw CustomError.badRequest('Missing password');
+      if(!rol) throw CustomError.badRequest('Missing rol');
+      if(!UserEntity.isValidRole(rol)) throw CustomError.badRequest('Invalid role');
+
+    return new UserEntity( id, nombre, email, contrasena, rol );
+  }
 }

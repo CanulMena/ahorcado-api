@@ -1,25 +1,27 @@
+import { regularExps } from "../../config/regular-exp";
+import { UserEntity, UserRole } from "../entities/user";
+
 
 
 export class RegisterUserDto {
 
   constructor(
-    public readonly name: string,
-    public readonly apellidos: string,
-    public readonly direccion: string,
-    public readonly localidad: string,
-    public readonly municipio: string,
+    public name: string, // Nombre del usuario
+    public email: string, // Guardar el correo con el que se registrará el usuario
+    public passwordHash: string, // Guardar el hash en vez de la contraseña
+    public rol: UserRole, //Roles que puede tener el usuario
   ){}
 
 
   static create( props: {[key: string]: any} ): [ string?, RegisterUserDto? ] { //uso de tuplas para retornar un error o un objeto
-    const { nombre, apellidos, direccion, localidad, municipio} = props;
-    //quiero validar que name no sea un falsy o no un string. ayudame con esa validación: 
-    if (typeof nombre !== 'string') return ['name must be a string'];
-    if (typeof apellidos !== 'string') return ['apellidos must be a string'];
-    if (typeof direccion !== 'string') return ['direccion must be a string'];
-    if (typeof localidad !== 'string') return ['localidad must be a number'];
-    if (typeof municipio !== 'string') return ['municipio must be a string'];
+    const { name, email, password, rol } = props;
+    if (!name) return ['Missing name'];
+    if (!email) return ['Missing email'];
+    if (!regularExps.email.test(email) ) return ['Invalid email'];
+    if (!password) return ['Missing password'];
+    if (password.length < 6) return ['password must be at least 6 characters long'];
+    if (!UserEntity.isValidRole(rol)) return ['Invalid Role'];
 
-    return [undefined, new RegisterUserDto( nombre, apellidos, direccion, localidad, municipio )];
+    return [undefined, new RegisterUserDto( name, email, password, rol )];
   }
 }

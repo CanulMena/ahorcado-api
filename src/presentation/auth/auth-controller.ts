@@ -29,11 +29,4 @@ export class AuthController {
     .catch( error => this.handleError(error, res));
   }
 
-  public getAll = async (req: Request, res: Response) => {
-    new AuthService()
-    .getAll()
-    .then( users => res.status(200).json(users))
-    .catch( error => this.handleError(error, res));
-  }
-
 } 

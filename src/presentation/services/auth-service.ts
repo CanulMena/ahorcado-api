@@ -13,10 +13,9 @@ export class AuthService {
     const userCreated = await this.prisma.create({ 
       data: {
         nombre: registerUserDto.name,
-        apellidos: registerUserDto.apellidos,
-        direccion: registerUserDto.direccion,
-        localidad: registerUserDto.localidad,
-        municipio: registerUserDto.municipio
+        correo: registerUserDto.email,
+        contrasena: registerUserDto.passwordHash,
+        rol: registerUserDto.rol
       }
     });
 
@@ -25,8 +24,4 @@ export class AuthService {
     return UserEntity.fromJson(userCreated);
   }
 
-  public async getAll(): Promise<UserEntity[]> {
-    const users = await this.prisma.findMany();
-    return users.map( (user: UserEntity) => UserEntity.fromJson(user));
-  }
 }

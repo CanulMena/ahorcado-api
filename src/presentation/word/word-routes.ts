@@ -1,17 +1,16 @@
 import { Router } from "express";
-import { AuthController } from "./auth-controller";
+import { WordController } from "./word-controller";
 
-export class AuthRoutes {
+export class WordRoutes {
 
   static get routes(): Router {
     const router = Router();
 
-    const authController = new AuthController(
-    );
+    const authController = new WordController();
 
     router.post(
       '/register',
-      authController.registerUser
+      authController.register
     );
 
 
