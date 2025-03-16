@@ -1,5 +1,7 @@
 import { Router } from "express";
 import { WordController } from "./word-controller";
+import { AuthMiddleware } from "../middlewares/auth-middleware";
+import { AuthService } from "../services/auth-service";
 
 export class WordRoutes {
 
@@ -8,13 +10,18 @@ export class WordRoutes {
 
     const authController = new WordController();
 
+    const authService = new AuthService();
+    const authMiddleware = new AuthMiddleware(authService);
+
     router.post(
       '/register',
+      authMiddleware.validateJWT,
       authController.register
     );
 
     router.get(
       '/difficulty/:difficulty',
+      authMiddleware.validateJWT,
       authController.getByDifficulty
     )
 
