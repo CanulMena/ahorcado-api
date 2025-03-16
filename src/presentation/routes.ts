@@ -11,7 +11,6 @@ export class AppRoutes {
 
       router.use('/api/word', WordRoutes.routes ); //Ruta de las palabras
 
-
       return router;
   }
 }

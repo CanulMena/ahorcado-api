@@ -13,6 +13,10 @@ export class WordRoutes {
       authController.register
     );
 
+    router.get(
+      '/difficulty/:difficulty',
+      authController.getByDifficulty
+    )
 
     return router;
   }

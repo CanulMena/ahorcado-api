@@ -1,8 +1,6 @@
 import { regularExps } from "../../config/regular-exp";
 import { UserEntity, UserRole } from "../entities/user";
 
-
-
 export class RegisterUserDto {
 
   constructor(
@@ -20,7 +18,7 @@ export class RegisterUserDto {
     if (!regularExps.email.test(email) ) return ['Invalid email'];
     if (!password) return ['Missing password'];
     if (password.length < 6) return ['password must be at least 6 characters long'];
-    if (!UserEntity.isValidRole(rol)) return ['Invalid Role'];
+    if (!UserEntity.isValidRole(rol)) return [`Invalid Role, valid roles: ${UserEntity.validRoles}`];
 
     return [undefined, new RegisterUserDto( name, email, password, rol )];
   }

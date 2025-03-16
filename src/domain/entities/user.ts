@@ -24,17 +24,17 @@ export class UserEntity {
     const {  
       id,
       nombre,
-      email,
+      correo,
       contrasena,
       rol } = props;
 
       if(!id) throw CustomError.badRequest('Missing id');
       if(!nombre) throw CustomError.badRequest('Missing nombre');
-      if(!email) throw CustomError.badRequest('Missing email');
+      if(!correo) throw CustomError.badRequest('Missing correo');
       if(!contrasena) throw CustomError.badRequest('Missing password');
       if(!rol) throw CustomError.badRequest('Missing rol');
       if(!UserEntity.isValidRole(rol)) throw CustomError.badRequest('Invalid role');
 
-    return new UserEntity( id, nombre, email, contrasena, rol );
+    return new UserEntity( id, nombre, correo, contrasena, rol );
   }
 }
