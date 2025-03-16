@@ -4,6 +4,8 @@ import { UserEntity } from '../../domain/entities/user';
 import { CustomError } from '../../domain/errors/custom-error';
 import { bcryptAdapter } from '../../config/plugins/bcryptAdapter';
 import { LoginUserDto } from '../../domain/dtos/login-user.dto';
+import { jwtAdapter } from '../../config/plugins/jwtAdapter';
+import { envs } from '../../config/envs';
 
 export class AuthService {
   constructor(
@@ -28,7 +30,7 @@ export class AuthService {
     return UserWithoutPassword;
   }
 
-  public async login( loginUserDto: LoginUserDto): Promise<Omit<UserEntity, 'passwordHash'>> {
+  public async login( loginUserDto: LoginUserDto): Promise<{ user: Omit<UserEntity, 'passwordHash'>, token: string }> {
     const userFound = await this.prisma.findUnique({
       where: {
         correo: loginUserDto.email
@@ -39,7 +41,26 @@ export class AuthService {
     const isMatchingPassword = await bcryptAdapter.compare(loginUserDto.password, userFound.contrasena);
     if (!isMatchingPassword) throw CustomError.badRequest('Invalid password');
     const UserWithoutPassword = this.mapUserEntity(userEntity);
-    return UserWithoutPassword;
+    const accessToken = await jwtAdapter.generateToken({
+      payload: { id: userFound.id },
+      secret: envs.JWT_SEED,
+      expiresIn: '1d'
+    });
+    return {
+      user: UserWithoutPassword,
+      token: accessToken
+    };
+  }
+
+  public async getUserById( userId: number ): Promise<UserEntity> {
+    const userFound = await this.prisma.findUnique({
+      where: {
+        id: userId
+      }
+    });
+    if (!userFound) throw CustomError.badRequest(`User not found with id ${userId}`);
+    const userEntity = UserEntity.fromJson(userFound);
+    return userEntity;
   }
   
   private mapUserEntity(user: UserEntity): Omit<UserEntity, 'passwordHash'> {
