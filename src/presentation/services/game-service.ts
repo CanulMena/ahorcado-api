@@ -22,13 +22,18 @@ export class GameService {
       FACIL: 100,
       MEDIO: 200,
       DIFICIL: 300
-    }[palabra.dificultad];
+    };
+
+    // Asegúrate de que palabra.dificultad sea del tipo correcto
+    const difficulty = palabra.dificultad as keyof typeof basePoints;
+
+    const points = basePoints[difficulty];
 
     // Calcular factor de intentos ajustado
     const T = Math.max(1 - ((registerGameDto.attemptsMade - 1) / registerGameDto.maximumNumberAttempts));
 
     // Calcular la puntuación final
-    const score = Math.round(basePoints * T); // Redondeamos para evitar decimales
+    const score = Math.round(points * T); // Redondeamos para evitar decimales
 
     const gameCreated = await this.prisma.partida.create({ 
       data: {
@@ -73,7 +78,7 @@ export class GameService {
     }[] 
     = await this.prisma.usuario.findMany({
       where: {
-        id: { in: ranking.map((r) => r.usuarioId) },
+        id: { in: ranking.map((r: { usuarioId: number; _sum: { puntuacion: number | null } }) => r.usuarioId) },
       },
       select: {
         id: true,
@@ -86,7 +91,7 @@ export class GameService {
       nombre: string;
       totalPuntos: number;
     }[] 
-    = ranking.map((ranking) => ({
+    = ranking.map((ranking: { usuarioId: number; _sum: { puntuacion: number | null } }) => ({
       usuarioId: ranking.usuarioId,
       nombre: usuarios.find((user) => user.id === ranking.usuarioId)?.nombre || "Desconocido",
       totalPuntos: ranking._sum.puntuacion || 0,

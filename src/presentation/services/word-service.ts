@@ -28,7 +28,7 @@ export class WordService {
       }
     });
     if (!wordsFound) throw CustomError.badRequest('Words not found');
-    const wordsEntity = wordsFound.map( word => WordEntity.fromJson(word));
+    const wordsEntity = wordsFound.map((word: { id: number; palabra: string; dificultad: string }) => WordEntity.fromJson(word));
     return wordsEntity;
   }
 
