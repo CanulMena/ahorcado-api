@@ -1,0 +1,58 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("POSTGRES_URL")
+}
+
+enum Dificultad {
+  FACIL
+  MEDIO
+  DIFICIL
+}
+
+enum Rol {
+  ADMIN
+  USUARIO
+}
+
+model Usuario {
+  id          Int     @id @default(autoincrement())
+  nombre      String
+  correo      String     @unique
+  contrasena  String
+  rol         Rol        @default(USUARIO)
+  partidas    Partida[]
+}
+
+model Palabra {
+  id          Int     @id @default(autoincrement())
+  palabra     String     @unique
+  dificultad  Dificultad
+  partidas    Partida[]
+
+  @@index([dificultad]) // Índice en 'dificultad' para filtrar palabras por nivel
+}
+
+model Partida {
+  id             Int      @id @default(autoincrement())
+  usuario        Usuario  @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  usuarioId      Int
+  palabra        Palabra  @relation(fields: [palabraId], references: [id], onDelete: Cascade)
+  palabraId      Int
+  puntuacion     Int
+  intentosUsados Int
+  intentosMaximos Int
+  creadaEn       DateTime @default(now())
+
+  @@index([puntuacion])  // Índice para ordenar partidas por puntuación
+}
+
