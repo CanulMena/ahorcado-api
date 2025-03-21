@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { Prisma, PrismaClient } from '@prisma/client';
 import { RegisterUserDto } from '../../domain/dtos/register-user.dto';
 import { UserEntity } from '../../domain/entities/user';
 import { CustomError } from '../../domain/errors/custom-error';
@@ -14,20 +14,30 @@ export class AuthService {
   private readonly prisma = new PrismaClient().usuario;
 
   public async register( registerUserDto: RegisterUserDto ): Promise<Omit<UserEntity, 'passwordHash'>> {
-    const hashedPassword = bcryptAdapter.hash(registerUserDto.passwordHash);
-    const userCreated = await this.prisma.create({ 
-      data: {
-        nombre: registerUserDto.name,
-        correo: registerUserDto.email,
-        contrasena: hashedPassword,
-        rol: registerUserDto.rol
+    try {
+      const hashedPassword = bcryptAdapter.hash(registerUserDto.passwordHash);
+      const userCreated = await this.prisma.create({
+        data: {
+          nombre: registerUserDto.name,
+          correo: registerUserDto.email,
+          contrasena: hashedPassword,
+          rol: registerUserDto.rol,
+        },
+      });
+
+      if (!userCreated) throw CustomError.badRequest('User not created');
+      const userEntity = UserEntity.fromJson(userCreated);
+      const userWithoutPassword = this.mapUserEntity(userEntity);
+      return userWithoutPassword;
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === 'P2002') { //explicame el error.code === 'P2002'. ¿Qué significa?
+          // Manejo del error de clave única
+          throw CustomError.badRequest(`The ${error.meta?.target} already exists`); //que es el error.meta?.target ? 
+        }
       }
-    });
-    //*Tengo que aprender a menejar el error cuando la el email ya existe.
-    if( !userCreated ) throw CustomError.badRequest('user not created');
-    const userEntity = UserEntity.fromJson(userCreated);
-    const UserWithoutPassword = this.mapUserEntity(userEntity);
-    return UserWithoutPassword;
+      throw error; // Relanza otros errores no controlados
+    }
   }
 
   public async login( loginUserDto: LoginUserDto): Promise<{ user: Omit<UserEntity, 'passwordHash'>, token: string }> {

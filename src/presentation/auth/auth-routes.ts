@@ -9,7 +9,6 @@ export class AuthRoutes {
     const router = Router();
 
     const authService = new AuthService();
-    const authMiddleware = new AuthMiddleware(authService);
 
     const authController = new AuthController();
 
