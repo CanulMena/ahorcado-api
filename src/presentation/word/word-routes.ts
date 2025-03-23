@@ -25,6 +25,25 @@ export class WordRoutes {
       authController.getByDifficulty
     )
 
+    router.get(
+      '/',
+      authMiddleware.validateJWT,
+      authController.getAll
+    )
+
+    router.get(
+      '/:id',
+      authMiddleware.validateJWT,
+      authController.getById
+    )
+
+    //update
+    router.put(
+      '/:id',
+      authMiddleware.validateJWT,
+      authController.update
+    )
+
     return router;
   }
 }
