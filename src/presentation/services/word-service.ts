@@ -2,6 +2,7 @@ import { PrismaClient } from "@prisma/client";
 import { WordEntity } from "../../domain/entities/word";
 import { CustomError } from "../../domain/errors/custom-error";
 import { RegisterWordDto } from "../../domain/dtos/register-word.dto";
+import { UpdateWordDto } from '../../domain/dtos/update-word.dto';
 
 export class WordService {
   constructor(){}
@@ -30,6 +31,42 @@ export class WordService {
     if (!wordsFound) throw CustomError.badRequest('Words not found');
     const wordsEntity = wordsFound.map((word: { id: number; palabra: string; dificultad: string }) => WordEntity.fromJson(word));
     return wordsEntity;
+  }
+
+  public async getAll(): Promise<WordEntity[]> {
+    const wordsFound = await this.prisma.findMany();
+    if (!wordsFound) throw CustomError.badRequest('Words not found');
+    const wordsEntity = wordsFound.map((word: { id: number; palabra: string; dificultad: string }) => WordEntity.fromJson(word));
+    return wordsEntity;
+  }
+
+  public async getById( id: number ): Promise<WordEntity> {
+    const wordFound = await this.prisma.findUnique({
+      where: {
+        id: id
+      }
+    });
+    if (!wordFound) throw CustomError.badRequest('Word not found');
+    const wordEntity = WordEntity.fromJson(wordFound);
+    return wordEntity;
+  }
+
+  public async update( id: number, updateWordDto: UpdateWordDto ): Promise<WordEntity> {
+
+    this.getById(id);
+
+    const wordUpdated = await this.prisma.update({
+      where: {
+        id: id
+      },
+      data: {
+        palabra: updateWordDto.word,
+        dificultad: updateWordDto.difficulty
+      }
+    });
+    if( !wordUpdated ) throw CustomError.badRequest('word not updated');
+    const wordEntity = WordEntity.fromJson(wordUpdated);
+    return wordEntity;
   }
 
 
