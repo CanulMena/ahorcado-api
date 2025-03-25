@@ -52,4 +52,22 @@ export class AuthMiddleware {
       res.status(500).json({ error: 'Internal server error' });
     }
   };
+
+  public validateRole = (requiredRoles: string[]) => {
+    return (req: Request, res: Response, next: NextFunction): void => {
+      const user = req.body.user as UserEntity;
+      if (!user) {
+        res.status(403).json({ error: 'User not found in the request' });
+        return;
+      }
+
+      if (!requiredRoles.includes(user.rol)) { //si el rol del usuario no esta en los roles permitidos
+        res.status(403).json({ error: `${user.rol} user is not the required role. Allowed roles: ${requiredRoles.join(', ')}` });
+        return;
+      }
+
+      next();
+    }
+  }
+
 }

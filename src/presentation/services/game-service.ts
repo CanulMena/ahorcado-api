@@ -15,7 +15,7 @@ export class GameService {
       where: { id: registerGameDto.wordId }
     });
 
-    if (!palabra) throw CustomError.badRequest("Word not found");
+    if (!palabra) throw CustomError.badRequest("palabra no encontrada");
 
     // Asignar bono base según la dificultad
     const basePoints = {
@@ -46,7 +46,7 @@ export class GameService {
       }
     });
     
-    if( !gameCreated ) throw CustomError.badRequest('game not created');
+    if( !gameCreated ) throw CustomError.badRequest('partida no creada');
     const gameEntity = GameEntity.fromJson(gameCreated);
     return gameEntity;
   }

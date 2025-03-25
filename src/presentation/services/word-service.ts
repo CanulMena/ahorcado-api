@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { Prisma, PrismaClient } from "@prisma/client";
 import { WordEntity } from "../../domain/entities/word";
 import { CustomError } from "../../domain/errors/custom-error";
 import { RegisterWordDto } from "../../domain/dtos/register-word.dto";
@@ -10,15 +10,25 @@ export class WordService {
   private readonly prisma = new PrismaClient().palabra;
 
   public async register( registerWordDto: RegisterWordDto ): Promise<WordEntity> {
-    const wordCreated = await this.prisma.create({ 
-      data: {
-        palabra: registerWordDto.word,
-        dificultad: registerWordDto.difficulty
+    try {
+      const wordCreated = await this.prisma.create({ 
+        data: {
+          palabra: registerWordDto.word,
+          dificultad: registerWordDto.difficulty
+        }
+      });
+      
+      if( !wordCreated ) throw CustomError.badRequest('palabra no creada');
+      const wordEntity = WordEntity.fromJson(wordCreated);
+      return wordEntity;
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === 'P2002') {
+          throw CustomError.badRequest(`La ${error.meta?.target} ya existe`);
+        }
       }
-    });
-    if( !wordCreated ) throw CustomError.badRequest('word not created');
-    const wordEntity = WordEntity.fromJson(wordCreated);
-    return wordEntity;
+      throw error
+    }
   }
 
   public async getByDifficulty( difficulty: string ): Promise<WordEntity[]> {
@@ -28,14 +38,14 @@ export class WordService {
         dificultad: difficulty
       }
     });
-    if (!wordsFound) throw CustomError.badRequest('Words not found');
+    if (!wordsFound) throw CustomError.badRequest('palabras no encontradas');
     const wordsEntity = wordsFound.map((word: { id: number; palabra: string; dificultad: string }) => WordEntity.fromJson(word));
     return wordsEntity;
   }
 
   public async getAll(): Promise<WordEntity[]> {
     const wordsFound = await this.prisma.findMany();
-    if (!wordsFound) throw CustomError.badRequest('Words not found');
+    if (!wordsFound) throw CustomError.badRequest('palabras no encontradas');
     const wordsEntity = wordsFound.map((word: { id: number; palabra: string; dificultad: string }) => WordEntity.fromJson(word));
     return wordsEntity;
   }
@@ -46,7 +56,7 @@ export class WordService {
         id: id
       }
     });
-    if (!wordFound) throw CustomError.badRequest('Word not found');
+    if (!wordFound) throw CustomError.badRequest('palabra no encontrada');
     const wordEntity = WordEntity.fromJson(wordFound);
     return wordEntity;
   }
@@ -64,7 +74,7 @@ export class WordService {
         dificultad: updateWordDto.difficulty
       }
     });
-    if( !wordUpdated ) throw CustomError.badRequest('word not updated');
+    if( !wordUpdated ) throw CustomError.badRequest('palabra no actualizada');
     const wordEntity = WordEntity.fromJson(wordUpdated);
     return wordEntity;
   }
