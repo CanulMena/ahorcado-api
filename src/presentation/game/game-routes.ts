@@ -26,5 +26,5 @@ export class GameRoutes {
     )
 
     return router;
-  }
+  } 
 }

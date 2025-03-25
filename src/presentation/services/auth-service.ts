@@ -21,11 +21,11 @@ export class AuthService {
           nombre: registerUserDto.name,
           correo: registerUserDto.email,
           contrasena: hashedPassword,
-          rol: registerUserDto.rol,
+          rol: 'USUARIO',
         },
       });
 
-      if (!userCreated) throw CustomError.badRequest('User not created');
+      if (!userCreated) throw CustomError.badRequest('Usuario no creado');
       const userEntity = UserEntity.fromJson(userCreated);
       const userWithoutPassword = this.mapUserEntity(userEntity);
       return userWithoutPassword;
@@ -33,7 +33,7 @@ export class AuthService {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === 'P2002') { //explicame el error.code === 'P2002'. ¿Qué significa?
           // Manejo del error de clave única
-          throw CustomError.badRequest(`The ${error.meta?.target} already exists`); //que es el error.meta?.target ? 
+          throw CustomError.badRequest(`El ${error.meta?.target} ya existe`); //que es el error.meta?.target ? 
         }
       }
       throw error; // Relanza otros errores no controlados
@@ -46,10 +46,10 @@ export class AuthService {
         correo: loginUserDto.email
       }
     });
-    if (!userFound) throw CustomError.badRequest('User not found');
+    if (!userFound) throw CustomError.badRequest('usuario no encontrado');
     const userEntity = UserEntity.fromJson(userFound);
     const isMatchingPassword = await bcryptAdapter.compare(loginUserDto.password, userFound.contrasena);
-    if (!isMatchingPassword) throw CustomError.badRequest('Invalid password');
+    if (!isMatchingPassword) throw CustomError.badRequest('contraseña incorrecta');
     const UserWithoutPassword = this.mapUserEntity(userEntity);
     const accessToken = await jwtAdapter.generateToken({
       payload: { id: userFound.id },
@@ -68,7 +68,7 @@ export class AuthService {
         id: userId
       }
     });
-    if (!userFound) throw CustomError.badRequest(`User not found with id ${userId}`);
+    if (!userFound) throw CustomError.badRequest(`usuario con id: ${userId} no encontrado`);
     const userEntity = UserEntity.fromJson(userFound);
     return userEntity;
   }

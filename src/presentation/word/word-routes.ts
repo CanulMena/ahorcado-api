@@ -16,6 +16,7 @@ export class WordRoutes {
     router.post(
       '/register',
       authMiddleware.validateJWT,
+      authMiddleware.validateRole(['ADMIN']),
       authController.register
     );
 
@@ -28,12 +29,14 @@ export class WordRoutes {
     router.get(
       '/',
       authMiddleware.validateJWT,
+      authMiddleware.validateRole(['ADMIN']),
       authController.getAll
     )
 
     router.get(
       '/:id',
       authMiddleware.validateJWT,
+      authMiddleware.validateRole(['ADMIN']),
       authController.getById
     )
 
@@ -41,6 +44,7 @@ export class WordRoutes {
     router.put(
       '/:id',
       authMiddleware.validateJWT,
+      authMiddleware.validateRole(['ADMIN']),
       authController.update
     )
 
