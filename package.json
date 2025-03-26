@@ -23,14 +23,11 @@
   "dependencies": {
     "@prisma/client": "^6.2.1",
     "@types/jsonwebtoken": "^9.0.7",
-    "@types/nspell": "^2.1.6",
     "bcryptjs": "^3.0.2",
     "cors": "^2.8.5",
-    "dictionary-en": "^4.0.0",
     "dotenv": "^16.4.5",
     "env-var": "^7.5.0",
     "express": "^4.21.1",
-    "jsonwebtoken": "^9.0.2",
-    "nspell": "^2.1.5"
+    "jsonwebtoken": "^9.0.2"
   }
 }
