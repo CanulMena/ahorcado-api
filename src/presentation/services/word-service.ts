@@ -3,6 +3,7 @@ import { WordEntity } from "../../domain/entities/word";
 import { CustomError } from "../../domain/errors/custom-error";
 import { RegisterWordDto } from "../../domain/dtos/register-word.dto";
 import { UpdateWordDto } from '../../domain/dtos/update-word.dto';
+import { WiktionaryDatasource } from "../../infrastructure/wiktionary.datasource";
 
 export class WordService {
   constructor(){}
@@ -11,6 +12,9 @@ export class WordService {
 
   public async register( registerWordDto: RegisterWordDto ): Promise<WordEntity> {
     try {
+      const wordExists: boolean = await WiktionaryDatasource.consultarWiktionary(registerWordDto.word);
+      if (!wordExists) throw CustomError.badRequest('la palabra no existe');
+
       const wordCreated = await this.prisma.create({ 
         data: {
           palabra: registerWordDto.word,
